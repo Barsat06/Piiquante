@@ -21,7 +21,6 @@ exports.createSauce = (req, res, next) => {
     ...JSON.parse(req.body.sauce),
     imageUrl: url + "/images/" + req.file.filename,
   });
-  console.log(newSauce);
   newSauce
     .save()
     .then((sauce) => res.status(201).json(sauce))
@@ -37,3 +36,21 @@ exports.modifySauce = (req, res, next) => {
     .catch((error) => res.status(400).json({ error: error }));
 };
 
+exports.deleteSauce = (req, res, next) => {
+  const sauceId = req.params.id;
+  sauce
+    .findOne({ _id: sauceId })
+    .then((sauce) => {
+      const filename = sauce.imageUrl.split("/images/")[1];
+      fs.unlink("./images/" + filename, (err) => {
+        if (err) {
+          console.log(err);
+        }
+      });
+    })
+    .catch((error) => res.status(404).json({ error: error }));
+  sauce
+    .deleteOne({ _id: sauceId })
+    .then((sauce) => res.status(200).json(sauce))
+    .catch((error) => res.status(400).json({ error: error }));
+};
